@@ -6,33 +6,32 @@ document.getElementById('search-form').addEventListener('submit', function(e) {
     const maxPrice = document.getElementById('max-price').value;
     const bedrooms = document.getElementById('bedrooms').value;
 
-    // Show loading message
-    const resultsContainer = document.getElementById('results');
-    resultsContainer.innerHTML = '<p>Loading results...</p>';
+    const API_KEY = 'AIzaSyBG_bUAYW0vUh6xqcDocPs1saueCpX7b1w';
+    const CX = 'your_custom_search_engine_id'; // Replace with your Custom Search Engine ID
 
-    // Replace with actual API call or scraping logic
-    fetch(`/search?town=${town}&minPrice=${minPrice}&maxPrice=${maxPrice}&bedrooms=${bedrooms}`)
+    const query = `${town} apartments ${bedrooms} bedrooms price between ${minPrice} and ${maxPrice}`;
+    const url = `https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(query)}&key=${API_KEY}&cx=${CX}`;
+
+    fetch(url)
         .then(response => response.json())
         .then(data => {
-            resultsContainer.innerHTML = ''; // Clear loading message
+            const resultsContainer = document.getElementById('results');
+            resultsContainer.innerHTML = ''; // Clear previous results
 
-            data.results.forEach(result => {
-                const item = document.createElement('div');
-                item.className = 'result-item';
-
-                item.innerHTML = `
-                    <h3>${result.title}</h3>
-                    <p>${result.description}</p>
-                    <p>Price: $${result.price}</p>
-                    <p>Contact: ${result.contact}</p>
-                    <a href="${result.link}" target="_blank">View Listing</a>
+            data.items.forEach(item => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'result-item';
+                itemElement.innerHTML = `
+                    <h3>${item.title}</h3>
+                    <p>${item.snippet}</p>
+                    <a href="${item.link}" target="_blank">View Listing</a>
                 `;
-
-                resultsContainer.appendChild(item);
+                resultsContainer.appendChild(itemElement);
             });
         })
         .catch(error => {
+            console.error('Error fetching data:', error);
+            const resultsContainer = document.getElementById('results');
             resultsContainer.innerHTML = '<p>Sorry, something went wrong. Please try again.</p>';
-            console.error('Error:', error);
         });
 });
